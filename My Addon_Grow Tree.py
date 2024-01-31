@@ -40,12 +40,24 @@ def main(context, type):
         bpy.context.scene.eevee.use_ssr = True
         x_position += 2
         
-    elif type == 'some-sells':
-        for i in range(0, 7, 2):
-            bpy.ops.mesh.primitive_plane_add(enter_editmode=False, align='WORLD', location=(x_position, i, 0), scale=(1, 1, 1))
-            bpy.context.scene.eevee.use_ssr = True
-        x_position += 2
-        
+    elif type == 'chess':
+        for i in range(1, 17, 2):
+            for g in range(1, 9):
+                bpy.ops.mesh.primitive_plane_add(enter_editmode=False, align='WORLD', location=(x_position, i, 0), scale=(1, 1, 1))
+                x_position += 2
+                obj = bpy.context.active_object
+                mat = bpy.data.materials.new(name = 'ColorMaterial')
+                obj.data.materials.append(mat)
+                if color_white == False:
+                    mat.diffuse_color = (0.0, 0.0, 0.0, 1.0)
+                else:
+                    mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+                color_white = not color_white
+                bpy.context.view_layer.update()
+                bpy.context.scene.eevee.use_ssr = True
+            x_position = 0
+            color_white = not color_white 
+            
 class SimpleOperator(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.simple_operator"
@@ -74,13 +86,13 @@ class SimpleCellOperator(bpy.types.Operator):
         main(context, 'cell')
         return {'FINISHED'}
 
-class SimpleSomeCellOperator(bpy.types.Operator):
+class SimpleChessOperator(bpy.types.Operator):
     """Tooltip"""
-    bl_idname = "object.simple_some_cell_operator"
-    bl_label = "Создать несколько клеточек"
+    bl_idname = "object.simple_chess_operator"
+    bl_label = "Создать шахматную доску"
 
     def execute(self, context):
-        main(context, 'some-sells')
+        main(context, 'chess')
         return {'FINISHED'}
 
 
@@ -142,24 +154,24 @@ class LayoutDemoPanel(bpy.types.Panel):
         row.scale_y = 2.0
         row.operator("object.simple_cell_operator")
         
-        layout.label(text="Создать несколько клеточек:")
+        layout.label(text="Создать шахматную доску:")
         row = layout.row()
         row.scale_y = 2.0
-        row.operator("object.simple_some_cell_operator")
+        row.operator("object.simple_chess_operator")
 
 def register():
     bpy.utils.register_class(SimpleOperator)
     bpy.utils.register_class(LayoutDemoPanel)
     bpy.utils.register_class(SimpleBushOperator)
     bpy.utils.register_class(SimpleCellOperator)
-    bpy.utils.register_class(SimpleSomeCellOperator)
+    bpy.utils.register_class(SimpleChessOperator)
 
 def unregister():
     bpy.utils.unregister_class(SimpleOperator)
     bpy.utils.unregister_class(LayoutDemoPanel)
     bpy.utils.unregister_class(SimpleBushOperator)
     bpy.utils.register_class(SimpleCellOperator)
-    bpy.utils.register_class(SimpleSomeCellOperator)
+    bpy.utils.register_class(SimpleChessOperator)
 
 if __name__ == "__main__":
     register()
