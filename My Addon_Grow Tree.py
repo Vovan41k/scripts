@@ -18,19 +18,11 @@ color_white = True
 def main(context, type):
     global x_position
     global color_white
-    if type == 'tree':
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1.5, enter_editmode=False, align='WORLD', location=(0, 0, 4), scale=(1, 1, 1))
-        bpy.ops.mesh.primitive_cylinder_add(radius=0.3, depth=3, enter_editmode=False, align='WORLD', location=(0, 0, 1.5), scale=(1, 1, 1))
-        bpy.context.scene.eevee.use_ssr = True
-    elif type == 'bush':
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=2, enter_editmode=False, align='WORLD', location=(x_position, 0, 2), scale=(2, 2, 2))
-        bpy.context.scene.eevee.use_ssr = True
-        x_position += 4
-    elif type == 'cell':
+    if type == 'cell':
         bpy.ops.mesh.primitive_plane_add(enter_editmode=False, align='WORLD', location=(x_position, 0, 0), scale=(1, 1, 1))
         obj = bpy.context.active_object
         mat = bpy.data.materials.new(name = 'ColorMaterial')
-        obj.data.materials.append(mat)
+        obj.data.materials.append(mat)       
         if color_white == False:
             mat.diffuse_color = (0.0, 0.0, 0.0, 1.0)
         else:
@@ -56,27 +48,26 @@ def main(context, type):
                 bpy.context.view_layer.update()
                 bpy.context.scene.eevee.use_ssr = True
             x_position = 0
-            color_white = not color_white 
+            color_white = not color_white
             
-class SimpleOperator(bpy.types.Operator):
-    """Tooltip"""
-    bl_idname = "object.simple_operator"
-    bl_label = "Вырастить дерево"
-
-
-    def execute(self, context):
-        main(context, 'tree')
-        return {'FINISHED'}
-
-class SimpleBushOperator(bpy.types.Operator):
-    """Tooltip"""
-    bl_idname = "object.simple_bush_operator"
-    bl_label = "Вырастить куст"
-
-    def execute(self, context):
-        main(context, 'bush')
-        return {'FINISHED'}
-    
+    elif type == 'white-chip':
+        bpy.ops.mesh.primitive_cylinder_add(enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(0.8, 0.8, 0.13))
+        obj = bpy.context.active_object
+        mat = bpy.data.materials.new(name = 'ColorMaterial')
+        obj.data.materials.append(mat)
+        mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+        bpy.context.view_layer.update()
+        bpy.context.scene.eevee.use_ssr = True
+        
+    elif type == 'black-chip':
+        bpy.ops.mesh.primitive_cylinder_add(enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(0.8, 0.8, 0.13))
+        obj = bpy.context.active_object
+        mat = bpy.data.materials.new(name = 'ColorMaterial')
+        obj.data.materials.append(mat)
+        mat.diffuse_color = (0.0, 0.0, 0.0, 1.0)
+        bpy.context.view_layer.update()
+        bpy.context.scene.eevee.use_ssr = True
+        
 class SimpleCellOperator(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.simple_cell_operator"
@@ -95,6 +86,23 @@ class SimpleChessOperator(bpy.types.Operator):
         main(context, 'chess')
         return {'FINISHED'}
 
+class SimpleWhiteChipOperator(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "object.simple_white_chip_operator"
+    bl_label = "Создать белую фишку"
+
+    def execute(self, context):
+        main(context, 'white-chip')
+        return {'FINISHED'}
+
+class SimpleBlackChipOperator(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "object.simple_black_chip_operator"
+    bl_label = "Создать черную фишку"
+    
+    def execute(self, context):
+        main(context, 'black-chip')
+        return {'FINISHED'}
 
 class LayoutDemoPanel(bpy.types.Panel):
     """Creates a Panel in the scene context of the properties editor"""
@@ -139,16 +147,6 @@ class LayoutDemoPanel(bpy.types.Panel):
         col.prop(scene, "frame_end")
 
         # Big render button
-        layout.label(text="Создать дерево:")
-        row = layout.row()
-        row.scale_y = 2.0
-        row.operator("object.simple_operator")
-
-        layout.label(text="Создать куст:")
-        row = layout.row()
-        row.scale_y = 2.0
-        row.operator("object.simple_bush_operator")
-
         layout.label(text="Создать клеточку:")
         row = layout.row()
         row.scale_y = 2.0
@@ -158,20 +156,31 @@ class LayoutDemoPanel(bpy.types.Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("object.simple_chess_operator")
+        
+        layout.label(text="Создать белую фишку:")
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("object.simple_white_chip_operator")
+        
+        layout.label(text="Создать черную фишку:")
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("object.simple_black_chip_operator")
 
 def register():
-    bpy.utils.register_class(SimpleOperator)
     bpy.utils.register_class(LayoutDemoPanel)
-    bpy.utils.register_class(SimpleBushOperator)
     bpy.utils.register_class(SimpleCellOperator)
     bpy.utils.register_class(SimpleChessOperator)
+    bpy.utils.register_class(SimpleWhiteChipOperator)
+    bpy.utils.register_class(SimpleBlackChipOperator)
+    
 
 def unregister():
-    bpy.utils.unregister_class(SimpleOperator)
     bpy.utils.unregister_class(LayoutDemoPanel)
-    bpy.utils.unregister_class(SimpleBushOperator)
-    bpy.utils.register_class(SimpleCellOperator)
-    bpy.utils.register_class(SimpleChessOperator)
+    bpy.utils.unregister_class(SimpleCellOperator)
+    bpy.utils.unregister_class(SimpleChessOperator)
+    bpy.utils.unregister_class(SimpleWhiteChipOperator)
+    bpy.utils.unregister_class(SimpleBlackChipOperator)
 
 if __name__ == "__main__":
     register()
