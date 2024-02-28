@@ -13,11 +13,16 @@ bl_info = {
 
 import bpy
 x_position = 0
-color_white = True 
+color_white = True
+whites = [[0, 15], [0, 11], [0, 7], [0, 3], [2, 13], [2, 9], [2, 5], [2, 1], [4, 15], [4, 11], [4, 7], [4, 3]]
+blacks = [[10, 13], [10, 9], [10, 5], [10, 1], [12, 15], [12, 11], [12, 7], [12, 3], [14, 13], [14, 9], [14, 5], [14, 1]]
 
 def main(context, type):
     global x_position
     global color_white
+    global whites
+    global blacks
+    
     if type == 'cell':
         bpy.ops.mesh.primitive_plane_add(enter_editmode=False, align='WORLD', location=(x_position, 0, 0), scale=(1, 1, 1))
         obj = bpy.context.active_object
@@ -49,9 +54,27 @@ def main(context, type):
                 bpy.context.scene.eevee.use_ssr = True
             x_position = 0
             color_white = not color_white
-            
+    
+    elif type == 'chips':
+        for i in whites:
+            bpy.ops.mesh.primitive_cylinder_add(enter_editmode=False, align='WORLD', location=(i[0], i[1], 0.15), scale=(0.8, 0.8, 0.13))
+            obj = bpy.context.active_object
+            mat = bpy.data.materials.new(name = 'ColorMaterial')
+            obj.data.materials.append(mat)
+            mat.diffuse_color = (1.0, 1.0, 1.0, 1.0)
+            bpy.context.view_layer.update()
+            bpy.context.scene.eevee.use_ssr = True
+        for i in blacks:
+            bpy.ops.mesh.primitive_cylinder_add(enter_editmode=False, align='WORLD', location=(i[0], i[1], 0.15), scale=(0.8, 0.8, 0.13))
+            obj = bpy.context.active_object
+            mat = bpy.data.materials.new(name = 'ColorMaterial')
+            obj.data.materials.append(mat)
+            mat.diffuse_color = (0.0, 0.0, 0.0, 1.0)
+            bpy.context.view_layer.update()
+            bpy.context.scene.eevee.use_ssr = True   
+        
     elif type == 'white-chip':
-        bpy.ops.mesh.primitive_cylinder_add(enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(0.8, 0.8, 0.13))
+        bpy.ops.mesh.primitive_cylinder_add(enter_editmode=False, align='WORLD', location=(10, 13, 0), scale=(0.8, 0.8, 0.13))
         obj = bpy.context.active_object
         mat = bpy.data.materials.new(name = 'ColorMaterial')
         obj.data.materials.append(mat)
@@ -102,6 +125,15 @@ class SimpleBlackChipOperator(bpy.types.Operator):
     
     def execute(self, context):
         main(context, 'black-chip')
+        return {'FINISHED'}
+
+class SimpleChipsOperator(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "object.simple_chips_operator"
+    bl_label = "Создать фишки"
+    
+    def execute(self, context):
+        main(context, 'chips')
         return {'FINISHED'}
 
 class LayoutDemoPanel(bpy.types.Panel):
@@ -157,6 +189,11 @@ class LayoutDemoPanel(bpy.types.Panel):
         row.scale_y = 2.0
         row.operator("object.simple_chess_operator")
         
+        layout.label(text="Создать фишки:")
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("object.simple_chips_operator")
+        
         layout.label(text="Создать белую фишку:")
         row = layout.row()
         row.scale_y = 2.0
@@ -173,7 +210,7 @@ def register():
     bpy.utils.register_class(SimpleChessOperator)
     bpy.utils.register_class(SimpleWhiteChipOperator)
     bpy.utils.register_class(SimpleBlackChipOperator)
-    
+    bpy.utils.register_class(SimpleChipsOperator)
 
 def unregister():
     bpy.utils.unregister_class(LayoutDemoPanel)
@@ -181,6 +218,7 @@ def unregister():
     bpy.utils.unregister_class(SimpleChessOperator)
     bpy.utils.unregister_class(SimpleWhiteChipOperator)
     bpy.utils.unregister_class(SimpleBlackChipOperator)
+    bpy.utils.unregister_class(SimpleChipsOperator)
 
 if __name__ == "__main__":
     register()
