@@ -91,6 +91,10 @@ def main(context, type):
         bpy.context.view_layer.update()
         bpy.context.scene.eevee.use_ssr = True
         
+    elif type == 'model':
+        file_path = 'C:\\Users\\User\\Documents\\dino\\mm_frame.obj'
+        bpy.ops.import_scene.obj(filepath=file_path)
+        
 class SimpleCellOperator(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "object.simple_cell_operator"
@@ -134,6 +138,15 @@ class SimpleChipsOperator(bpy.types.Operator):
     
     def execute(self, context):
         main(context, 'chips')
+        return {'FINISHED'}
+    
+class SimpleModelOperator(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "object.simple_model_operator"
+    bl_label = "Создать 3d модель"
+    
+    def execute(self, context):
+        main(context, 'model')
         return {'FINISHED'}
 
 class LayoutDemoPanel(bpy.types.Panel):
@@ -203,6 +216,11 @@ class LayoutDemoPanel(bpy.types.Panel):
         row = layout.row()
         row.scale_y = 2.0
         row.operator("object.simple_black_chip_operator")
+        
+        layout.label(text="Создать 3d модель:")
+        row = layout.row()
+        row.scale_y = 2.0
+        row.operator("object.simple_model_operator")
 
 def register():
     bpy.utils.register_class(LayoutDemoPanel)
@@ -211,6 +229,7 @@ def register():
     bpy.utils.register_class(SimpleWhiteChipOperator)
     bpy.utils.register_class(SimpleBlackChipOperator)
     bpy.utils.register_class(SimpleChipsOperator)
+    bpy.utils.register_class(SimpleModelOperator)
 
 def unregister():
     bpy.utils.unregister_class(LayoutDemoPanel)
@@ -219,6 +238,7 @@ def unregister():
     bpy.utils.unregister_class(SimpleWhiteChipOperator)
     bpy.utils.unregister_class(SimpleBlackChipOperator)
     bpy.utils.unregister_class(SimpleChipsOperator)
+    bpy.utils.unregister_class(SimpleModelOperator)
 
 if __name__ == "__main__":
     register()
